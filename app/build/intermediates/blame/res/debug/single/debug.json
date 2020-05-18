@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable_ic_start_button.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\ic_start_button.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\layout_spinner_item.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\layout\\spinner_item.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable_ic_stop_button.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\ic_stop_button.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable_gradient_fill.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\gradient_fill.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable_ic_launcher.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\ic_launcher.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\font_titillium_web.ttf.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\font\\titillium_web.ttf"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\drawable_ic_logo.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\ic_logo.xml"
+    },
+    {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_main.xml.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\layout\\activity_main.xml"
+    }
+]
