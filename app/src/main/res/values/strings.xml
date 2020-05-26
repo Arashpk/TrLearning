@@ -12,8 +12,8 @@
   <string name="loss_title">Loss</string>
 
   <string name="logo_title">On-Device Activity Recognizer</string>
-  <string name="classA_class">Class A</string>
-  <string name="classB_class">Class B</string>
+  <string name="classA_class">Walk</string>
+  <string name="classB_class">Run</string>
 
   <string name="zero_value">0.0</string>
 
@@ -24,9 +24,9 @@
   </string-array>
 
   <string-array name="class_array">
-    <item>Class A</item>
-    <item>Class B</item>
-    <item>Class C</item>
+    <item>Walk</item>
+    <item>Run</item>
+    <item>Up str.</item>
   </string-array>
 
   </resources>

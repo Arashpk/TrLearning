@@ -262,13 +262,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } else if (mode == Mode.Data_Collection) {
                 tlModel.addSample(input, classId);
 
-                if (classId.equals("Class A")) {
+                if (classId.equals("Walk")) {
                     classAInstanceCount += 1;
                     Log.d("classAInstanceCount", String.valueOf(classAInstanceCount));
-                } else if (classId.equals("Class B")) {
+                } else if (classId.equals("Run")) {
                     classBInstanceCount += 1;
                     Log.d("classBInstanceCount", String.valueOf(classBInstanceCount));
-                } else if (classId.equals("Class C")) {
+                } else if (classId.equals("Up str.")) {
                     classCInstanceCount += 1;
                     Log.d("classCInstanceCount", String.valueOf(classCInstanceCount));
                 }
