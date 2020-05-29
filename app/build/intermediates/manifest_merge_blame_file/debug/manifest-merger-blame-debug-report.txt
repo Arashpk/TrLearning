@@ -66,17 +66,27 @@
 38-->D:\-=uni\MobileComputing\OnDeviceActivityRecognition\android\app\src\main\AndroidManifest.xml:24:19-66
 39            </intent-filter>
 40        </activity>
-41
-42        <provider
-42-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:23:9-27:43
-43            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
-43-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:24:13-79
-44            android:authorities="org.tensorflow.lite.examples.transfer.lifecycle-process"
-44-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:25:13-69
-45            android:exported="false"
-45-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:26:13-37
-46            android:multiprocess="true" />
-46-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:27:13-40
-47    </application>
-48
-49</manifest>
+41        <activity
+41-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:12:9-16:66
+42            android:name="pub.devrel.easypermissions.AppSettingsDialogHolderActivity"
+42-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:13:13-86
+43            android:exported="false"
+43-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:14:13-37
+44            android:label=""
+44-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:15:13-29
+45            android:theme="@style/EasyPermissions.Transparent" />
+45-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:16:13-63
+46
+47        <provider
+47-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:23:9-27:43
+48            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+48-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:24:13-79
+49            android:authorities="org.tensorflow.lite.examples.transfer.lifecycle-process"
+49-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:25:13-69
+50            android:exported="false"
+50-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:26:13-37
+51            android:multiprocess="true" />
+51-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:27:13-40
+52    </application>
+53
+54</manifest>

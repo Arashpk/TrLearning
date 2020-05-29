@@ -28,6 +28,10 @@
         "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\drawable\\ic_logo.xml"
     },
     {
+        "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\raw_reference.csv.flat",
+        "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\raw\\reference.csv"
+    },
+    {
         "merged": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\build\\intermediates\\res\\merged\\debug\\layout_activity_main.xml.flat",
         "source": "D:\\-=uni\\MobileComputing\\OnDeviceActivityRecognition\\android\\app\\src\\main\\res\\layout\\activity_main.xml"
     }

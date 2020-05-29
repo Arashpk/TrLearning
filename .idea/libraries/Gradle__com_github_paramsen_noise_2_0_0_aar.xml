@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.paramsen:noise:2.0.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8c49fe83a4413c3bfb59ad86c50a29bd/jetified-noise-2.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8c49fe83a4413c3bfb59ad86c50a29bd/jetified-noise-2.0.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.paramsen/noise/2.0.0/d4acc7b32efeb45fe29b98813505b6ce19747476/noise-2.0.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.paramsen/noise/2.0.0/f5d8f641ef701403d9a53a03ad19f50fcef5caa/noise-2.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

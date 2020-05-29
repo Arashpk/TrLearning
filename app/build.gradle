@@ -44,6 +44,8 @@ dependencies {
     implementation project(path: ':transfer_api')
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation 'com.github.paramsen:noise:2.0.0'
+    implementation 'pub.devrel:easypermissions:2.0.1'
     // If you want to use custom Keras models from TFLiteTransferConverter
     // Python API, uncomment the following Flex AAR dependency.
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly'
@@ -51,4 +53,5 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation 'com.google.android.material:material:1.0.0'
+
 }

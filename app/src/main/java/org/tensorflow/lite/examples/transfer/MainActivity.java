@@ -1,11 +1,13 @@
 package org.tensorflow.lite.examples.transfer;
 
+import android.Manifest;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -19,11 +21,25 @@ import android.widget.Toast;
 
 import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.Prediction;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import androidx.appcompat.app.AppCompatActivity;
+import pub.devrel.easypermissions.EasyPermissions;
 
 enum Mode {
     Data_Collection,
@@ -33,7 +49,27 @@ enum Mode {
 }
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    /*KNN vars begin*/
+    String FILE_NAME = "Recordings";
+    List<String> ActivityTypes = Arrays.asList("downstairs", "jogging", "running", "standing", "upstairs", "walking");
+    int sampleCount = 0, windowLength = 50, Fs = 40;
+    int FEATURE_LENGTH = 12, SAMPLE_LENGTH = 118;
 
+    float[] acc_X_array = new float[windowLength];
+    float[] acc_Y_array = new float[windowLength];
+    float[] acc_Z_array = new float[windowLength];
+    float accelerometer_X_value = 0, accelerometer_Y_value = 0, accelerometer_Z_value = 0;
+    String[] categoryArray = new String[SAMPLE_LENGTH];
+    double[][] trainedSampleTable = new double[SAMPLE_LENGTH][FEATURE_LENGTH];
+    FileOutputStream fos = null;
+    private static final byte isAnalysing = 2;
+    private static final byte isIdle = -1;
+    byte systemState = isIdle;
+    // functions class init
+    functions Functions = new functions();
+    /*KNN vars end*/
+
+    float[] confidenceList = new float[ActivityTypes.size()];
     final int NUM_SAMPLES = 80;
     double VB_THRESHOLD = 0.75;
 
@@ -160,7 +196,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 optionSpinner.setEnabled(false);
                 isRunning = true;
                 // Uncomment following lines to load an existing model.
-                /*if (mode == Mode.Inference) {
+                if (mode == Mode.Inference) {
+                    systemState = isAnalysing;
+                    streamInit();
+                    analyze(v);
+
                     File modelPath = getApplicationContext().getFilesDir();
                     File modelFile = new File(modelPath, "inference.tflite");
                     if (modelFile.exists()) {
@@ -169,13 +209,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     } else {
                         Toast.makeText(getApplicationContext(), "No model has been loaded", Toast.LENGTH_SHORT).show();
                     }
-                }*/
+                }
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (fos != null) {
+                    try {
+                        systemState = isIdle;
+                        fos.close();
+                        //Toast.makeText(this, "Stopped recording the " + getFilesDir() + "/" + FILE_NAME, Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        //Toast.makeText(this, "Error. Cannot Stop", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                }
+                systemState = isIdle;
                 startButton.setEnabled(true);
                 stopButton.setEnabled(false);
                 optionSpinner.setEnabled(true);
@@ -183,15 +234,130 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (mode == Mode.Training) {
                     tlModel.disableTraining();
                     // Uncomment following lines to save the model.
-          /*
-            File modelPath = getApplicationContext().getFilesDir();
-            File modelFile = new File(modelPath, MODEL_NAME);
-            tlModel.saveModel(modelFile);
-            Toast.makeText(getApplicationContext(), "Model saved.", Toast.LENGTH_SHORT).show();
-           */
+
+                    File modelPath = getApplicationContext().getFilesDir();
+                    File modelFile = new File(modelPath, "MODEL_NAME");
+                    tlModel.saveModel(modelFile);
+                    Toast.makeText(getApplicationContext(), "Model saved.", Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
+        readReferenceCSV();
+    }
+
+    private void readReferenceCSV() {
+        InputStream is = getResources().openRawResource(R.raw.reference);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(is, Charset.forName("UTF-8"))
+        );
+        String line = "";
+        int offset = 2;
+        int i = 0;
+
+        try {
+            for (int sampleLine = 0; sampleLine < SAMPLE_LENGTH; sampleLine++) {
+                // row offset
+                while (i < offset) {
+                    i++;
+                    line = reader.readLine();
+                }
+                // Split by ','
+                String[] tokens = line.split(",");
+                // Read the Category
+                categoryArray[sampleLine] = tokens[0];
+                // Read the table data
+                for (int Col = 0; Col < 12; Col++) {
+                    double currentFeature = Double.parseDouble(tokens[Col + 1]);
+                    trainedSampleTable[sampleLine][Col] = currentFeature;
+                }
+                line = reader.readLine();
+
+            }
+            Log.d("My Activity", "Just created trainign sample");
+        } catch (IOException e) {
+            Log.wtf("MyActivity", "Error reading file on line " + line, e);
+            e.printStackTrace();
+        }
+
+
+    }
+
+    void streamInit() {
+        //initiates a file to record or analyze
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            Toast.makeText(this, "has permissions", Toast.LENGTH_SHORT).show();
+            FILE_NAME = Functions.fileNAmeGenerator();
+            switch (systemState) {
+                case isAnalysing:
+                    FILE_NAME = "ConfMatrix_" + FILE_NAME;
+                    break;
+            }
+
+            if (isExternalStorageWritable()) {
+                Context context = this;
+                File textFile = new File(context.getExternalFilesDir(null), FILE_NAME);
+                try {
+                    //fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
+                    fos = new FileOutputStream(textFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    systemState = isIdle;
+                }
+                Toast.makeText(this, "Recording at" + getFilesDir() + "/" + FILE_NAME, Toast.LENGTH_LONG).show();
+            }
+
+        } else {
+            EasyPermissions.requestPermissions(this, "I need your permission", 123, perms);
+        }
+
+    }
+
+    private boolean isExternalStorageWritable() {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            Log.i("State", "Yes it is writable");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void analyze(View v) {
+        Timer analyzeTimer = new Timer();
+        if (systemState == isIdle) {
+            analyzeTimer.cancel();
+        }
+        TimerTask analyzeTask = new TimerTask() {
+            @Override
+            public void run() {
+                acc_X_array[sampleCount] = accelerometer_X_value;
+                acc_Y_array[sampleCount] = accelerometer_Y_value;
+                acc_Z_array[sampleCount] = accelerometer_Z_value;
+                sampleCount++;
+                if (sampleCount >= windowLength) {
+                    sampleCount = 0;
+                    Functions.SetVars(windowLength, Fs, FEATURE_LENGTH, SAMPLE_LENGTH,
+                            acc_X_array, acc_Y_array, acc_Z_array,
+                            trainedSampleTable, categoryArray);
+                    Calendar calendar = Calendar.getInstance();
+                    SimpleDateFormat format = new SimpleDateFormat("HH_mm_ss");
+                    String time = format.format(calendar.getTime());
+
+
+                    String Activity = Functions.categorize();
+                    //String gotText = TextDetectedActivity.getText().toString();
+                    //TextDetectedActivity.setText(time + " -- " + Activity + "\n" + gotText);
+                    try {
+                        Log.d("vot", Functions.getVotingArrayEU().toString());
+                        fos.write((Functions.getVotingArrayEU().toString() + "\n").getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        analyzeTimer.schedule(analyzeTask, 0, 1000 / Fs);
     }
 
     protected void onPause() {
@@ -215,9 +381,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
-                x_accel.add(event.values[0]);
-                y_accel.add(event.values[1]);
-                z_accel.add(event.values[2]);
+                accelerometer_X_value = event.values[0];
+                accelerometer_Y_value = event.values[1];
+                accelerometer_Z_value = event.values[1];
+
+                x_accel.add(accelerometer_X_value);
+                y_accel.add(accelerometer_Y_value);
+                z_accel.add(accelerometer_Z_value);
                 break;
         }
 
@@ -278,8 +448,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } else if (mode == Mode.Inference) {
                 Prediction[] predictions = tlModel.predict(input);
                 // Vibrate the phone if Class B is detected.
-                Log.d("Class A:", String.valueOf(predictions[0].getConfidence()));
-                Log.d("Class B:", String.valueOf(predictions[1].getConfidence()));
+
+                confidenceList[0] = round(predictions[0].getConfidence(), 4);
+                confidenceList[1] = round(predictions[1].getConfidence(), 4);
+                confidenceList[2] = round(predictions[2].getConfidence(), 4);
+                confidenceList[3] = 3;
+                confidenceList[4] = 4;
+                confidenceList[5] = 5;
 
                 if (predictions[1].getConfidence() > VB_THRESHOLD)
                     vibrator.vibrate(VibrationEffect.createOneShot(200,
