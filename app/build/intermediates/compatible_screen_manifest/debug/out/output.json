@@ -1,1 +1,6 @@
-[]
+{
+  "version": 1,
+  "applicationId": "org.tensorflow.lite.examples.transfer",
+  "variantType": "BASE_APK",
+  "elements": []
+}

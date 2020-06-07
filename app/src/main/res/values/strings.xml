@@ -24,9 +24,11 @@
   </string-array>
 
   <string-array name="class_array">
-    <item>Walk</item>
-    <item>Run</item>
-    <item>Up str.</item>
+    <item>Upstairs</item>
+    <item>Downstairs</item>
+    <item>Walking</item>
+    <item>Jogging</item>
+
   </string-array>
 
   </resources>

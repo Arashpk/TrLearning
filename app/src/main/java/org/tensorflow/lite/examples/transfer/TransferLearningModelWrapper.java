@@ -47,10 +47,12 @@ public class TransferLearningModelWrapper implements Closeable {
     private final ConditionVariable shouldTrain = new ConditionVariable();
     private volatile LossConsumer lossConsumer;
 
+    //'Downstairs','Jogging','Sitting','Standing','Upstairs','Walking'
     TransferLearningModelWrapper(Context context) {
         model =
                 new TransferLearningModel(
-                        new AssetModelLoader(context, "model"), Arrays.asList("Walk", "Run", "Up str."));
+
+                        new AssetModelLoader(context, "model"), Arrays.asList("Upstairs", "Downstairs", "Walking", "Jogging"));
 
         new Thread(() -> {
             while (!Thread.interrupted()) {

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,7 +20,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.tensorflow.lite.examples.transfer.api.TransferLearningModel.Prediction;
+import androidx.appcompat.app.AppCompatActivity;
+
+import org.tensorflow.lite.examples.transfer.api.TransferLearningModel;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,11 +37,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import androidx.appcompat.app.AppCompatActivity;
 import pub.devrel.easypermissions.EasyPermissions;
 
 enum Mode {
@@ -49,9 +52,17 @@ enum Mode {
 }
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    // for the base model
+    int SMPSready = 0;
+    private List<Classifier> mClassifiers = new ArrayList<>();
+
     /*KNN vars begin*/
-    String FILE_NAME = "Recordings";
+    String KNNActivity = "Nothing";
+    String KNNFILE_NAME= "KNN_rec";
+    String HeadFILE_NAME= "Head_rec";
+    String BaseFILE_NAME= "Base_rec";
     List<String> ActivityTypes = Arrays.asList("downstairs", "jogging", "running", "standing", "upstairs", "walking");
+
     int sampleCount = 0, windowLength = 50, Fs = 40;
     int FEATURE_LENGTH = 12, SAMPLE_LENGTH = 118;
 
@@ -61,7 +72,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     float accelerometer_X_value = 0, accelerometer_Y_value = 0, accelerometer_Z_value = 0;
     String[] categoryArray = new String[SAMPLE_LENGTH];
     double[][] trainedSampleTable = new double[SAMPLE_LENGTH][FEATURE_LENGTH];
-    FileOutputStream fos = null;
+    FileOutputStream KNNModelfos = null;
+    FileOutputStream HeadModelfos = null;
+    FileOutputStream BaseModelfos = null;
     private static final byte isAnalysing = 2;
     private static final byte isIdle = -1;
     byte systemState = isIdle;
@@ -69,16 +82,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     functions Functions = new functions();
     /*KNN vars end*/
 
+    List<String> HeadActivityTypes = Arrays.asList("Upstairs", "Downstairs", "Walking", "Jogging", "Sitting", "Standing");
     float[] confidenceList = new float[ActivityTypes.size()];
     final int NUM_SAMPLES = 80;
     double VB_THRESHOLD = 0.75;
 
-    int classAInstanceCount = 0;
-    int classBInstanceCount = 0;
-    int classCInstanceCount = 0;
+    //'Downstairs','Jogging','Sitting','Standing','Upstairs','Walking'
+    int DownstairsInstanceCount = 0;
+    int JoggingInstanceCount = 0;
+    int SittingInstanceCount = 0;
+    int StandingInstanceCount = 0;
+    int UpstairsInstanceCount = 0;
+    int WalkingInstanceCount = 0;
 
     boolean isRunning = false;
-
+    String finalVoteHeadstring = "Nothing";
     SensorManager mSensorManager;
     Sensor mAccelerometer;
     TransferLearningModelWrapper tlModel;
@@ -87,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     static List<Float> x_accel;
     static List<Float> y_accel;
     static List<Float> z_accel;
+    static List<Float> x_accel_normed = new ArrayList<>();
+    static List<Float> y_accel_normed = new ArrayList<>();
+    static List<Float> z_accel_normed = new ArrayList<>();
 
     static List<Float> input_signal;
 
@@ -94,20 +115,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     Button startButton;
     Button stopButton;
-    TextView classATextView;
-    TextView classBTextView;
-
-    TextView classAInstanceCountTextView;
-    TextView classBInstanceCountTextView;
     TextView lossValueTextView;
     Spinner optionSpinner;
     Spinner classSpinner;
     Vibrator vibrator;
 
+    TextView KNNFinalVote;
+    TextView BaseinalVote;
+    TextView HeadfinalVote;
+    TextView TextKNNDetectedActivity;
+    TextView TextBaseDetectedActivity;
+    TextView TextHeadDetectedActivity;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -115,10 +139,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         stopButton = (Button) findViewById(R.id.buttonStop);
         stopButton.setEnabled(false);
 
-        classATextView = (TextView) findViewById(R.id.classAOutputValueTextView);
-        classBTextView = (TextView) findViewById(R.id.classBOutputValueTextView);
-        classAInstanceCountTextView = (TextView) findViewById(R.id.classACountValueTextView);
-        classBInstanceCountTextView = (TextView) findViewById(R.id.classBCountValueTextView);
+        KNNFinalVote = (TextView) findViewById(R.id.knnFinalVote);
+        BaseinalVote = (TextView) findViewById(R.id.baseFinalVote);
+        HeadfinalVote = (TextView) findViewById(R.id.headFinalVote);
+
+        TextKNNDetectedActivity = (TextView) findViewById(R.id.label_Activity_KNN);
+        TextBaseDetectedActivity = (TextView) findViewById(R.id.label_Activity_Base);
+        TextHeadDetectedActivity = (TextView) findViewById(R.id.label_Activity_Head);
+
+        TextKNNDetectedActivity.setMovementMethod(new ScrollingMovementMethod());
+        TextBaseDetectedActivity.setMovementMethod(new ScrollingMovementMethod());
+        TextHeadDetectedActivity.setMovementMethod(new ScrollingMovementMethod());
+
+
         lossValueTextView = (TextView) findViewById(R.id.lossValueTextView);
 
         optionSpinner = (Spinner) findViewById(R.id.optionSpinner);
@@ -146,6 +179,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        //mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         tlModel = new TransferLearningModelWrapper(getApplicationContext());
 
         optionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -209,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     } else {
                         Toast.makeText(getApplicationContext(), "No model has been loaded", Toast.LENGTH_SHORT).show();
                     }
+
                 }
             }
         });
@@ -216,13 +251,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (fos != null) {
+                if (KNNModelfos != null) {
                     try {
-                        systemState = isIdle;
-                        fos.close();
-                        //Toast.makeText(this, "Stopped recording the " + getFilesDir() + "/" + FILE_NAME, Toast.LENGTH_LONG).show();
+                        KNNModelfos.close();
                     } catch (IOException e) {
-                        //Toast.makeText(this, "Error. Cannot Stop", Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
+                    }
+                }
+                if (BaseModelfos != null) {
+                    try {
+                        BaseModelfos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (HeadModelfos != null) {
+                    try {
+                        HeadModelfos.close();
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -243,7 +289,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }
         });
+        // for KNN
         readReferenceCSV();
+        // for the base model
+        // TensorFlow: load up our saved model to perform inference from local storage
+        loadModel();
+        Timer SMPS = new Timer();
+        //SMPS.cancel();
+        TimerTask analyzeTask = new TimerTask() {
+            @Override
+            public void run() {
+                SMPSready = 1;
+            }
+        };
+        SMPS.schedule(analyzeTask, 0, 50); //20HZ smps
+    }
+
+    private void loadModel() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mClassifiers.add(
+                            TensorFlowLiteClassifier.create(getAssets(), "TensorFlowLite",
+                                    "base/converted_model.tflite", "base/label.txt"));
+                } catch (final Exception e) {
+                    throw new RuntimeException("Error initializing classifiers!", e);
+                }
+            }
+        }).start();
     }
 
     private void readReferenceCSV() {
@@ -288,24 +362,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             Toast.makeText(this, "has permissions", Toast.LENGTH_SHORT).show();
-            FILE_NAME = Functions.fileNAmeGenerator();
+            KNNFILE_NAME = Functions.fileNAmeGenerator();
+            HeadFILE_NAME = Functions.fileNAmeGenerator();
+            BaseFILE_NAME = Functions.fileNAmeGenerator();
             switch (systemState) {
                 case isAnalysing:
-                    FILE_NAME = "ConfMatrix_" + FILE_NAME;
+                    KNNFILE_NAME = "KNNConfMatrix_" + KNNFILE_NAME;
+                    HeadFILE_NAME = "HeadConfMatrix_" + HeadFILE_NAME;
+                    BaseFILE_NAME = "BaseConfMatrix_" + BaseFILE_NAME;
                     break;
             }
 
             if (isExternalStorageWritable()) {
                 Context context = this;
-                File textFile = new File(context.getExternalFilesDir(null), FILE_NAME);
+                File KNNCSVFile = new File(context.getExternalFilesDir(null), KNNFILE_NAME);
+                File HeadCSVFile = new File(context.getExternalFilesDir(null), HeadFILE_NAME);
+                File BaseCSVFile = new File(context.getExternalFilesDir(null), BaseFILE_NAME);
                 try {
-                    //fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
-                    fos = new FileOutputStream(textFile);
+                    KNNModelfos = new FileOutputStream(KNNCSVFile);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     systemState = isIdle;
                 }
-                Toast.makeText(this, "Recording at" + getFilesDir() + "/" + FILE_NAME, Toast.LENGTH_LONG).show();
+                try {
+                    HeadModelfos = new FileOutputStream(HeadCSVFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    systemState = isIdle;
+                }
+                try {
+                    BaseModelfos = new FileOutputStream(BaseCSVFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    systemState = isIdle;
+                }
+                Toast.makeText(this, "Recording at" + getFilesDir() + "/" + KNNFILE_NAME, Toast.LENGTH_SHORT).show();
             }
 
         } else {
@@ -344,13 +435,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     SimpleDateFormat format = new SimpleDateFormat("HH_mm_ss");
                     String time = format.format(calendar.getTime());
 
+                    //KNN output scroll
+                    KNNActivity = Functions.categorize();
+                    String KnnVotingArray = Functions.getVotingArrayEU().toString();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            KNNFinalVote.setText(KnnVotingArray);
+                            String gotText = TextKNNDetectedActivity.getText().toString();
+                            TextKNNDetectedActivity.setText(KNNActivity + "\n" + gotText);
+                        }
+                    });
 
-                    String Activity = Functions.categorize();
-                    //String gotText = TextDetectedActivity.getText().toString();
-                    //TextDetectedActivity.setText(time + " -- " + Activity + "\n" + gotText);
-                    try {
+                    try { //KNN log to file
                         Log.d("vot", Functions.getVotingArrayEU().toString());
-                        fos.write((Functions.getVotingArrayEU().toString() + "\n").getBytes());
+                        KNNModelfos.write((Functions.getVotingArrayEU().toString() + "\n").getBytes());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -385,14 +484,33 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 accelerometer_Y_value = event.values[1];
                 accelerometer_Z_value = event.values[1];
 
-                x_accel.add(accelerometer_X_value);
-                y_accel.add(accelerometer_Y_value);
-                z_accel.add(accelerometer_Z_value);
+                if (SMPSready == 1) {
+                    SMPSready = 0; //slows down the DAQ
+                    x_accel.add(accelerometer_X_value);
+                    y_accel.add(accelerometer_Y_value);
+                    z_accel.add(accelerometer_Z_value);
+                }
                 break;
         }
 
         //Check if we have desired number of samples for sensors, if yes, the process input.
         if (x_accel.size() == NUM_SAMPLES && y_accel.size() == NUM_SAMPLES && z_accel.size() == NUM_SAMPLES) {
+            //normalize
+            for (int i = 0; i < x_accel.size(); i++) {
+                x_accel_normed.add((float) 0); //just to init
+                float norm = (x_accel.get(i) - Collections.min(x_accel)) / Collections.max(x_accel);
+                x_accel_normed.set(i, norm);
+            }
+            for (int i = 0; i < y_accel.size(); i++) {
+                y_accel_normed.add((float) 0); //just to init
+                float norm = (y_accel.get(i) - Collections.min(y_accel)) / Collections.max(y_accel);
+                y_accel_normed.set(i, norm);
+            }
+            for (int i = 0; i < z_accel.size(); i++) {
+                z_accel_normed.add((float) 0); //just to init
+                float norm = (z_accel.get(i) - Collections.min(z_accel)) / Collections.max(z_accel);
+                z_accel_normed.set(i, norm);
+            }
             processInput();
         }
     }
@@ -405,9 +523,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void processInput() {
         int i = 0;
         while (i < NUM_SAMPLES) {
-            input_signal.add(x_accel.get(i));
-            input_signal.add(y_accel.get(i));
-            input_signal.add(z_accel.get(i));
+            input_signal.add(x_accel_normed.get(i));
+            input_signal.add(y_accel_normed.get(i));
+            input_signal.add(z_accel_normed.get(i));
             i++;
         }
 
@@ -416,11 +534,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (isRunning) {
             if (mode == Mode.Training) {
                 int batchSize = tlModel.getTrainBatchSize();
-                if (classAInstanceCount >= batchSize && classBInstanceCount >= batchSize && classCInstanceCount >= batchSize) {
+                if (DownstairsInstanceCount >= batchSize && JoggingInstanceCount >= batchSize && WalkingInstanceCount >= batchSize
+                        && UpstairsInstanceCount >= batchSize) {//&& SittingInstanceCount >= batchSize && StandingInstanceCount >= batchSize) {
                     tlModel.enableTraining((epoch, loss) -> runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            lossValueTextView.setText(Float.toString(loss));
+                            lossValueTextView.setText(Float.toString(round(loss, 2)));
                         }
                     }));
                 } else {
@@ -431,40 +550,123 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             } else if (mode == Mode.Data_Collection) {
                 tlModel.addSample(input, classId);
+                switch (classId) {
+                    case "Walking":
+                        WalkingInstanceCount += 1;
+                        Log.d("WalkingInstanceCount", Integer.toString(WalkingInstanceCount));
+                        if (WalkingInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
+                        break;
+                    case "Jogging":
+                        JoggingInstanceCount += 1;
+                        Log.d("JoggingInstanceCount", Integer.toString(JoggingInstanceCount));
+                        if (JoggingInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
 
-                if (classId.equals("Walk")) {
-                    classAInstanceCount += 1;
-                    Log.d("classAInstanceCount", String.valueOf(classAInstanceCount));
-                } else if (classId.equals("Run")) {
-                    classBInstanceCount += 1;
-                    Log.d("classBInstanceCount", String.valueOf(classBInstanceCount));
-                } else if (classId.equals("Up str.")) {
-                    classCInstanceCount += 1;
-                    Log.d("classCInstanceCount", String.valueOf(classCInstanceCount));
+                        break;
+                    case "Upstairs":
+                        UpstairsInstanceCount += 1;
+                        Log.d("UpstairsInstanceCount", Integer.toString(UpstairsInstanceCount));
+                        if (UpstairsInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
+
+                        break;
+                    case "Downstairs":
+                        DownstairsInstanceCount += 1;
+                        Log.d("DownstairsInstanceCount", Integer.toString(DownstairsInstanceCount));
+                        if (DownstairsInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
+
+                        break;
+                    case "Sitting":
+                        SittingInstanceCount += 1;
+                        Log.d("SittingInstanceCount", Integer.toString(SittingInstanceCount));
+                        if (SittingInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
+
+                        break;
+                    case "Standing":
+                        StandingInstanceCount += 1;
+                        Log.d("StandingInstanceCount", Integer.toString(StandingInstanceCount));
+                        if (StandingInstanceCount == 5) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                        }
+
+                        break;
                 }
 
-                classAInstanceCountTextView.setText(Integer.toString(classAInstanceCount));
-                classBInstanceCountTextView.setText(Integer.toString(classBInstanceCount));
             } else if (mode == Mode.Inference) {
-                Prediction[] predictions = tlModel.predict(input);
-                // Vibrate the phone if Class B is detected.
+                //for the Head model
+                TransferLearningModel.Prediction[] HEADpredictions = tlModel.predict(input);
 
-                confidenceList[0] = round(predictions[0].getConfidence(), 4);
-                confidenceList[1] = round(predictions[1].getConfidence(), 4);
-                confidenceList[2] = round(predictions[2].getConfidence(), 4);
-                confidenceList[3] = 3;
-                confidenceList[4] = 4;
-                confidenceList[5] = 5;
+                confidenceList[0] = round(HEADpredictions[0].getConfidence(), 2);
+                confidenceList[1] = round(HEADpredictions[1].getConfidence(), 2);
+                confidenceList[2] = round(HEADpredictions[2].getConfidence(), 2);
+                confidenceList[3] = round(HEADpredictions[3].getConfidence(), 2);
+                confidenceList[4] = -1;//round(HEADpredictions[4].getConfidence(), 2);
+                confidenceList[5] = -1;//round(HEADpredictions[5].getConfidence(), 2);
 
-                if (predictions[1].getConfidence() > VB_THRESHOLD)
-                    vibrator.vibrate(VibrationEffect.createOneShot(200,
-                            VibrationEffect.DEFAULT_AMPLITUDE));
+                List<Float> confidenceArrayList = new ArrayList<Float>();
+                confidenceArrayList.add(confidenceList[0]);
+                confidenceArrayList.add(confidenceList[1]);
+                confidenceArrayList.add(confidenceList[2]);
+                confidenceArrayList.add(confidenceList[3]);
+                //confidenceArrayList.add(confidenceList[4]);
+                //confidenceArrayList.add(confidenceList[5]);
 
-                String classAOutput = Float.toString(round(predictions[0].getConfidence(), 4));
-                String classBOutput = Float.toString(round(predictions[1].getConfidence(), 4));
+                // head model scroll
+                String Activity = confidenceArrayList.toString();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        HeadfinalVote.setText(Activity);
+                    }
+                });
 
-                classATextView.setText(classAOutput);
-                classBTextView.setText(classBOutput);
+                Float finalVoteHeadIndex = Collections.max(confidenceArrayList);
+                finalVoteHeadstring = HeadActivityTypes.get(confidenceArrayList.indexOf(finalVoteHeadIndex));
+                String gotTextHead = TextHeadDetectedActivity.getText().toString();
+                TextHeadDetectedActivity.setText(finalVoteHeadstring + "\n" + gotTextHead);
+                try { //Head model log to file
+                    Log.d("Head VOT", confidenceArrayList.toString());
+                    HeadModelfos.write((confidenceArrayList.toString() + "\n").getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //base model scroll
+                for (Classifier classifier : mClassifiers) {
+                    final Classification res = classifier.recognize(input);
+                    String BaseActivity = res.getLabel();
+                    String gotTextBase = TextBaseDetectedActivity.getText().toString();
+                    TextBaseDetectedActivity.setText(BaseActivity + "\n" + gotTextBase);
+                    float[] baseVotingArray = TensorFlowLiteClassifier.getBaseVotingArray();
+                    baseVotingArray[0] = round(baseVotingArray[0], 2);
+                    baseVotingArray[1] = round(baseVotingArray[1], 2);
+                    baseVotingArray[2] = round(baseVotingArray[2], 2);
+                    baseVotingArray[3] = round(baseVotingArray[3], 2);
+                    baseVotingArray[4] = round(baseVotingArray[4], 2);
+                    baseVotingArray[5] = round(baseVotingArray[5], 2);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            BaseinalVote.setText(Arrays.toString(baseVotingArray));
+
+                        }
+                    });
+                    try { //Base model log to file
+                        Log.d("Head VOT", confidenceArrayList.toString());
+                        BaseModelfos.write((Arrays.toString(baseVotingArray) + "\n").getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
         }
 
@@ -474,6 +676,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         z_accel.clear();
         input_signal.clear();
     }
+
 
     private float[] toFloatArray(List<Float> list) {
         int i = 0;

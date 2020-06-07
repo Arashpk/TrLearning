@@ -35,7 +35,7 @@
 22        android:allowBackup="true"
 22-->D:\-=uni\MobileComputing\OnDeviceActivityRecognition\android\app\src\main\AndroidManifest.xml:12:7-33
 23        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-23-->[androidx.core:core:1.1.0] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\34b4ab0d8b65ac74ddd00d45b26dd963\core-1.1.0\AndroidManifest.xml:24:18-86
+23-->[androidx.core:core:1.1.0] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\03736cf4bc3669a69d502627b70a527e\core-1.1.0\AndroidManifest.xml:24:18-86
 24        android:configChanges="orientation"
 24-->D:\-=uni\MobileComputing\OnDeviceActivityRecognition\android\app\src\main\AndroidManifest.xml:13:7-42
 25        android:debuggable="true"
@@ -67,26 +67,26 @@
 39            </intent-filter>
 40        </activity>
 41        <activity
-41-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:12:9-16:66
+41-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\816ad3a7e53597b3de94573dadf231eb\jetified-easypermissions-2.0.1\AndroidManifest.xml:12:9-16:66
 42            android:name="pub.devrel.easypermissions.AppSettingsDialogHolderActivity"
-42-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:13:13-86
+42-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\816ad3a7e53597b3de94573dadf231eb\jetified-easypermissions-2.0.1\AndroidManifest.xml:13:13-86
 43            android:exported="false"
-43-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:14:13-37
+43-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\816ad3a7e53597b3de94573dadf231eb\jetified-easypermissions-2.0.1\AndroidManifest.xml:14:13-37
 44            android:label=""
-44-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:15:13-29
+44-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\816ad3a7e53597b3de94573dadf231eb\jetified-easypermissions-2.0.1\AndroidManifest.xml:15:13-29
 45            android:theme="@style/EasyPermissions.Transparent" />
-45-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\bc8224fc9fb408956e4a32ec7420aa8f\jetified-easypermissions-2.0.1\AndroidManifest.xml:16:13-63
+45-->[pub.devrel:easypermissions:2.0.1] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\816ad3a7e53597b3de94573dadf231eb\jetified-easypermissions-2.0.1\AndroidManifest.xml:16:13-63
 46
 47        <provider
-47-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:23:9-27:43
+47-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b2ab2810aef06ca8ddf07317c0e0f5b0\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:23:9-27:43
 48            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
-48-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:24:13-79
+48-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b2ab2810aef06ca8ddf07317c0e0f5b0\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:24:13-79
 49            android:authorities="org.tensorflow.lite.examples.transfer.lifecycle-process"
-49-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:25:13-69
+49-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b2ab2810aef06ca8ddf07317c0e0f5b0\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:25:13-69
 50            android:exported="false"
-50-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:26:13-37
+50-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b2ab2810aef06ca8ddf07317c0e0f5b0\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:26:13-37
 51            android:multiprocess="true" />
-51-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b4c2a386b8ceb5499e9214ce89cc7a9f\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:27:13-40
+51-->[androidx.lifecycle:lifecycle-process:2.1.0-rc01] C:\Users\arash\.gradle\caches\transforms-2\files-2.1\b2ab2810aef06ca8ddf07317c0e0f5b0\jetified-lifecycle-process-2.1.0-rc01\AndroidManifest.xml:27:13-40
 52    </application>
 53
 54</manifest>

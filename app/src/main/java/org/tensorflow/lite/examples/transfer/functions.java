@@ -212,8 +212,9 @@ public class functions {
         //Log.d("Confusion Matrix", ActivityTypes.toString());
         //Log.d("Confusion Matrix", votingArrayEU.toString());
         int finalVoteEUIndex = Collections.max(votingArrayEU);
-        int finalVoteMANIndex = Collections.max(votingArrayMAN);
         String finalVoteEUstring = ActivityTypes.get(votingArrayEU.indexOf(finalVoteEUIndex));
+
+        int finalVoteMANIndex = Collections.max(votingArrayMAN);
         String finalVoteMANstring = ActivityTypes.get(votingArrayMAN.indexOf(finalVoteMANIndex));
         return finalVoteEUstring;
     }
